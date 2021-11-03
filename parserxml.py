@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from pytube import YouTube
 import re
 import requests
 from xml.etree import ElementTree as ET
@@ -28,3 +29,7 @@ for child in root:
                 print("\tThumb: " + cchild.findall("./binaries/binary[@id='imagen_portada']/thumb_link")[0].text)
             else:
                 print("\tThumb: " + cchild.findall("./binaries/binary[@id='thumbnail']/thumb_link")[0].text)
+
+        if child.attrib['bid'] == '9482':
+            print("\tLink: https://www.curriculumnacional.cl/offline/videos/descargas/" + YouTube(cchild.findall("./binaries/binary[@id='youtube']/url")[0].text).video_id + ".mp4")
+            print("\tThumb: " + cchild.findall("./binaries/binary[@id='youtube']/thumb_link")[0].text)
