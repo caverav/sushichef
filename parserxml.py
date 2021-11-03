@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from xml.etree import ElementTree as ET
 import requests
 url = "https://www.curriculumnacional.cl/estudiante/621/xml-article-239657.xml"
