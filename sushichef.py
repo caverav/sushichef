@@ -14,7 +14,7 @@ class TutorialChef(SushiChef):
     # 1. PROVIDE CHANNEL INFO  (replace <placeholders> with your own values)
     ############################################################################
     channel_info = {
-        'CHANNEL_SOURCE_DOMAIN': '<camilo.fvv.cl>',       # who is providing the content (e.g. learningequality.org)
+        'CHANNEL_SOURCE_DOMAIN': 'newtenberg.cl',       # who is providing the content (e.g. learningequality.org)
         'CHANNEL_SOURCE_ID': 'idcanal',                   # channel's unique id
         'CHANNEL_TITLE': 'The tutorial channel',
         'CHANNEL_LANGUAGE': 'es',
