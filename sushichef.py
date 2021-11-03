@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 from ricecooker.chefs import SushiChef
 from ricecooker.classes.nodes import ChannelNode, HTML5AppNode, SlideshowNode, TopicNode, VideoNode, DocumentNode, AudioNode
 from ricecooker.classes.files import DocumentFile, SlideImageFile, ThumbnailFile, VideoFile, AudioFile
@@ -7,6 +6,7 @@ from le_utils.constants import licenses
 from ricecooker.classes.licenses import get_license
 
 # imports y asignaciones previas respecto al xml
+from pytube import YouTube
 import re
 import requests
 from xml.etree import ElementTree as ET
@@ -45,25 +45,43 @@ class MineducChef(SushiChef):
             for cchild in child: # itera por cada artículo
                 c+=1
                 # extrae el titlo y el link del recurso a partir de los atributos <name> y <link>
-                if (child.tag == 'xml_ar_leoprimero_textos'):
-                    titulo, recurso = cchild.find("name").text, cchild.find("binaries").find("binary").find("filename").text
-                elif (child.tag == 'xml_ar_leoprimero_clases'):
-                    titulo, recurso = cchild.find("name").text, cchild.find("binaries").find("binary").find("link").text
-                elif (child.tag == 'xml_ar_leoprimero_lecturas'):
-                    titulo, recurso = cchild.find("name").text, cchild.find("binaries").find("binary").find("link").text
-                elif (child.tag == 'xml_ar_leoprimero_audiolibros'):
-                    titulo, recurso = cchild.find("name").text, cchild.find("binaries")[1].find("link").text
+
+                titulo = cchild.find("name").text
+                #TODO: falta poner thumbnails
+                if child.attrib['bid'] == '9480':#textos [pdf]
+                    recurso = cchild.findall("./binaries/binary[@id='textoescolar_descarga']/link")[0].text
+                    thumb = cchild.findall("./binaries/binary[@id='textoescolar_descarga']/thumb_link")[0].text
+                    document_file = DocumentFile(path=recurso)
+                    examplepdf = DocumentNode(title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
+                
+                if child.attrib['bid'] == '9478': #clases [pdf]
+                    recurso = cchild.findall("./binaries/binary[@id='recurso_pdf']/link")[0].text
+                    thumb =  cchild.findall("./binaries/binary[@id='recurso_pdf']/thumb_link")[0].text
+                    document_file = DocumentFile(path=recurso)
+                    examplepdf = DocumentNode(title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
+                
+                if child.attrib['bid'] == '9481': #lecturas [pdf]
+                    recurso = cchild.findall("./binaries/binary[@id='recurso_pdf']/link")[0].text
+                    thumb = cchild.findall("./binaries/binary[@id='recurso_pdf']/thumb_link")[0].text
+                    document_file = DocumentFile(path=recurso)
+                    examplepdf = DocumentNode(title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
+
+                if child.attrib['bid'] == '9479': # audiolibros [mp3]
+                    recurso = cchild.findall("./binaries/binary[@id='recurso_mp3']/link")[0].text
+                    if cchild.findall("./binaries/binary[@id='imagen_portada']/thumb_link") != []:
+                        thumb = cchild.findall("./binaries/binary[@id='imagen_portada']/thumb_link")[0].text
+                    else:
+                        thumb = cchild.findall("./binaries/binary[@id='thumbnail']/thumb_link")[0].text
+                    document_file = AudioFile(path=recurso)
+                    examplepdf = AudioNode(title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
+
+                if child.attrib['bid'] == '9482': # orientaciones [mp4]
+                    recurso = "https://www.curriculumnacional.cl/offline/videos/descargas/" + YouTube(cchild.findall("./binaries/binary[@id='youtube']/url")[0].text).video_id + ".mp4"
+                    thumb = cchild.findall("./binaries/binary[@id='youtube']/thumb_link")[0].text
+                    document_file = VideoFile(path=recurso)
+                    examplepdf = VideoNode(title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
 
 
-                # imprime de forma legible la estructura de lo extraido
-                print("\nTítulo: " + titulo + "\n|") 
-                print("|__ Recurso: "+ recurso) 
-                # Si no es mp3
-                if not (re.search("\.mp3$", recurso)): 
-                    print("|__ Miniatura: " + cchild.find("binaries").find("binary").find("thumb_link").text + "\n")
-                # Si es mp3
-                else: 
-                    print("|__ Miniatura: No tienen miniatura los mp3\n")
                 # Create topics to add to your channel
                 ########################################################################
                 # Here we are creating a topic named 'Example Topic'
@@ -88,25 +106,6 @@ class MineducChef(SushiChef):
                 # You can add documents (pdfs and ePubs), videos, audios, and other content
                 ########################################################################
                 # let's create a document file called 'Example PDF'
-                if (re.search(r"\.pdf$", recurso)):
-                    document_file = DocumentFile(path=recurso)
-                    examplepdf = DocumentNode(title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
-                elif (re.search(r"\.mp3$", recurso)):
-                    document_file = AudioFile(path=recurso)
-                    examplepdf = AudioNode(title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
-                elif (re.search(r"\.mp4$", recurso)):
-                    document_file = VideoFile(path=recurso)
-                    examplepdf = VideoNode(title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
-                # recon png and jpeg files
-                elif (re.search(r"\.png$", recurso)):
-                    document_file = SlideImageFile(path=recurso)
-                    examplepdf = SlideshowNode(title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
-                elif (re.search(r"\.jp(e)?g$", recurso)):
-                    document_file = SlideImageFile(path=recurso)
-                    examplepdf = SlideshowNode(title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
-                else:
-                    print("No se reconoce el tipo de archivo: " + recurso)
-                    exit(0)
                 # TODO: Create your pdf file here (use any url to a .pdf file)
 
                 # We are also going to add a video file called 'Example Video'
