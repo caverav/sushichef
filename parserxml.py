@@ -1,12 +1,22 @@
 #!/usr/bin/env python3
-from xml.etree import ElementTree as ET
+import re
 import requests
-url = "https://www.curriculumnacional.cl/estudiante/621/xml-article-239657.xml"
-r = requests.get(url)
+from xml.etree import ElementTree as ET
+r = requests.get("https://www.curriculumnacional.cl/estudiante/621/xml-article-239657.xml")
 root = ET.fromstring(r.content)
-# iterate over root
-for child in root:
-    for cchild in child:
-        print("TITULO: " + cchild.find("name").text) #TITULO
-        print("\tLINK: "+ cchild.find("binaries").find("binary").find("link").text)
-        print()
+
+for child in root: # itera por cada hijo del xml
+    for cchild in child: # itera por cada artículo
+
+        # extrae el titlo y el link del recurso a partir de los atributos <name> y <link>
+        titulo, recurso = cchild.find("name").text, cchild.find("binaries").find("binary").find("link").text
+
+        # imprime de forma legible la estructura de lo extraido
+        print("\nTítulo: " + titulo + "\n|") 
+        print("|__ Recurso: "+ recurso) 
+        # Si no es mp3
+        if not (re.search("\.mp3$", recurso)): 
+            print("|__ Miniatura: " + cchild.find("binaries").find("binary").find("thumb_link").text + "\n")
+        # Si es mp3
+        else: 
+            print("|__ Miniatura: No tienen miniatura los mp3\n")
