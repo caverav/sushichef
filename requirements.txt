@@ -2,10 +2,11 @@ pip3:
     pytube
     ricecooker
 
-#paquetes:
-#    depende de libfreetype6-dev
-#    png
+#paquetes/dependencias:
+#    	depende de libfreetype6-dev (freetype)
+#    	png
+#	jpeg
 
 #notas:
-    no hay suficiente almacenamiento
+#	no hay suficiente almacenamiento (524 MB máx)
 
