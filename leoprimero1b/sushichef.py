@@ -14,12 +14,7 @@ r = requests.get("https://www.curriculumnacional.cl/estudiante/621/xml-article-2
 root = ET.fromstring(r.content)
 
 class MineducChef(SushiChef):
-    """
-    The SushiChef class takes care of uploading channel to Kolibri Studio.
-    """
 
-    # 1. PROVIDE CHANNEL INFO  (replace <placeholders> with your own values)
-    ############################################################################
     channel_info = {
         'CHANNEL_SOURCE_DOMAIN': 'curriculumnacional.cl',       # who is providing the content (e.g. learningequality.org)
         'CHANNEL_SOURCE_ID': 'leoYAprendo1eroBasico',                   # channel's unique id
@@ -29,15 +24,7 @@ class MineducChef(SushiChef):
         'CHANNEL_DESCRIPTION': 'Programa educativo del Gobierno de Chile',      # (optional) description of the channel (optional)
      }
 
-    # 2. CONSTRUCT CHANNEL
-    ############################################################################
     def construct_channel(self, *args, **kwargs):
-        """
-        This method is reponsible for creating a `ChannelNode` object and
-        populating it with `TopicNode` and `ContentNode` children.
-        """
-        # Create channel
-        ########################################################################
         channel = self.get_channel(*args, **kwargs)     # uses self.channel_info
 
         topicos = ["Textos escolares oficiales 2021", "Clases semanales", "Lecturas Compartidas", "Audiolibros LeoPrimero", "Orientaciones para el desarrollo de Habilidades"]
@@ -99,10 +86,10 @@ class MineducChef(SushiChef):
 
                 if child.attrib['bid'] == '9479': # audiolibros [mp3]
                     recurso = cchild.findall("./binaries/binary[@id='recurso_mp3']/link")[0].text
-                    if cchild.findall("./binaries/binary[@id='imagen_portada']/thumb_link") != []:
-                        thumb = cchild.findall("./binaries/binary[@id='imagen_portada']/thumb_link")[0].text
-                    else:
+                    if cchild.findall("./binaries/binary[@id='thumbnail']/thumb_link") != []:
                         thumb = cchild.findall("./binaries/binary[@id='thumbnail']/thumb_link")[0].text
+                    else:
+                        thumb = cchild.findall("./binaries/binary[@id='imagen_portada']/thumb_link")[0].text
                     document_file = AudioFile(path=recurso)
                     examplepdf = AudioNode(thumbnail=thumb, title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
                     topico.add_child(examplepdf)
@@ -114,60 +101,9 @@ class MineducChef(SushiChef):
                     examplepdf = VideoNode(thumbnail=thumb, title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
                     topico.add_child(examplepdf)
 
-                # Create topics to add to your channel
-                ########################################################################
-                # Here we are creating a topic named 'Example Topic'
-                # exampletopic = TopicNode(source_id=titulo, title=titulo)
-                # TODO: Create your topic here
-
-                # Now we are adding 'Example Topic' to our channel
-                # channel.add_child(exampletopic)
-                # TODO: Add your topic to channel here
-
-                # You can also add subtopics to topics
-                # Here we are creating a subtopic named 'Example Subtopic'
-                # examplesubtopic = TopicNode(source_id="topic-1a", title="Example Subtopic")
-                # TODO: Create your subtopic here
-
-                # Now we are adding 'Example Subtopic' to our 'Example Topic'
-                # exampletopic.add_child(examplesubtopic)
-                # TODO: Add your subtopic to your topic here
-
-
-                # Content
-                # You can add documents (pdfs and ePubs), videos, audios, and other content
-                ########################################################################
-                # let's create a document file called 'Example PDF'
-                # TODO: Create your pdf file here (use any url to a .pdf file)
-
-                # We are also going to add a video file called 'Example Video'
-                # video_file = VideoFile(path="https://ia600209.us.archive.org/27/items/RiceChef/Rice Chef.mp4")
-                # fancy_license = get_license(licenses.SPECIAL_PERMISSIONS, description='Special license for ricecooker fans only.', copyright_holder='The chef video makers')
-                # examplevideo = VideoNode(title="Example Video", source_id="example-video", files=[video_file], license=fancy_license)
-                # TODO: Create your video file here (use any url to a .mp4 file)
-
-                # Finally, we are creating an audio file called 'Example Audio'
-                # audio_file = AudioFile(path="https://ia802508.us.archive.org/5/items/testmp3testfile/mpthreetest.mp3")
-                # exampleaudio = AudioNode(title="Example Audio", source_id="example-audio", files=[audio_file], license=get_license(licenses.PUBLIC_DOMAIN))
-                # TODO: Create your audio file here (use any url to a .mp3 file)
-
-                # Now that we have our files, let's add them to our channel
-                 # Adding 'Example PDF' to your channel
-                #exampletopic.add_child(examplevideo) # Adding 'Example Video' to 'Example Topic'
-                #examplesubtopic.add_child(exampleaudio) # Adding 'Example Audio' to 'Example Subtopic'
-
-                # TODO: Add your pdf file to your channel
-                # TODO: Add your video file to your topic
-                # TODO: Add your audio file to your subtopic
-
-                # the `construct_channel` method returns a ChannelNode that will be
-                # processed by the ricecooker framework
         return channel
 
 
 if __name__ == '__main__':
-    """
-    This code will run when the sushi chef is called from the command line.
-    """
     chef = MineducChef()
     chef.main()

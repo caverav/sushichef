@@ -51,9 +51,12 @@ class MineducChef(SushiChef):
                     if cchild.findall("./binaries/binary[@id='recurso_pdf']/link") != []:
                         recurso = cchild.findall("./binaries/binary[@id='recurso_pdf']/link")[0].text
                         thumb =  cchild.findall("./binaries/binary[@id='recurso_pdf']/thumb_link")[0].text
-                    else:
+                    if cchild.findall("./binaries/binary[@id='recurso_1']/link") != []:
                         recurso = cchild.findall("./binaries/binary[@id='recurso_1']/link")[0].text
                         thumb =  cchild.findall("./binaries/binary[@id='recurso_1']/thumb_link")[0].text
+                    if cchild.findall("./binaries/binary[@id='recurso_2']/link") != []:
+                        recurso = cchild.findall("./binaries/binary[@id='recurso_2']/link")[0].text
+                        thumb =  cchild.findall("./binaries/binary[@id='recurso_2']/thumb_link")[0].text
 
                     document_file = DocumentFile(path=recurso)
                     examplepdf = DocumentNode(thumbnail=thumb, title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
@@ -76,10 +79,10 @@ class MineducChef(SushiChef):
 
                 if child.attrib['bid'] == '9479': # audiolibros [mp3]
                     recurso = cchild.findall("./binaries/binary[@id='recurso_mp3']/link")[0].text
-                    if cchild.findall("./binaries/binary[@id='imagen_portada']/thumb_link") != []:
-                        thumb = cchild.findall("./binaries/binary[@id='imagen_portada']/thumb_link")[0].text
-                    else:
+                    if cchild.findall("./binaries/binary[@id='thumbnail']/thumb_link") != []:
                         thumb = cchild.findall("./binaries/binary[@id='thumbnail']/thumb_link")[0].text
+                    else:
+                        thumb = cchild.findall("./binaries/binary[@id='imagen_portada']/thumb_link")[0].text
                     document_file = AudioFile(path=recurso)
                     examplepdf = AudioNode(thumbnail=thumb, title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
                     topico.add_child(examplepdf)
