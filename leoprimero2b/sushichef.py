@@ -17,7 +17,7 @@ class MineducChef(SushiChef):
 
     channel_info = {
         'CHANNEL_SOURCE_DOMAIN': 'curriculumnacional.cl',
-        'CHANNEL_SOURCE_ID': 'leoYAprendo2doBasico',
+        'CHANNEL_SOURCE_ID': 'leoaprendo2dobasico',
         'CHANNEL_TITLE': 'Leo 2° Básico',
         'CHANNEL_LANGUAGE': 'es',
         'CHANNEL_THUMBNAIL': 'https://www.curriculumnacional.cl/estudiante/621/articles-239663_imagen_portada.thumb_iCuadrada.jpg',
@@ -51,24 +51,64 @@ class MineducChef(SushiChef):
                     if cchild.findall("./binaries/binary[@id='recurso_pdf']/link") != []:
                         recurso = cchild.findall("./binaries/binary[@id='recurso_pdf']/link")[0].text
                         thumb =  cchild.findall("./binaries/binary[@id='recurso_pdf']/thumb_link")[0].text
-                    if cchild.findall("./binaries/binary[@id='recurso_1']/link") != []:
-                        recurso = cchild.findall("./binaries/binary[@id='recurso_1']/link")[0].text
-                        thumb =  cchild.findall("./binaries/binary[@id='recurso_1']/thumb_link")[0].text
-                    if cchild.findall("./binaries/binary[@id='recurso_2']/link") != []:
-                        recurso = cchild.findall("./binaries/binary[@id='recurso_2']/link")[0].text
-                        thumb =  cchild.findall("./binaries/binary[@id='recurso_2']/thumb_link")[0].text
+                        document_file = DocumentFile(path=recurso)
+                        examplepdf = DocumentNode(thumbnail=thumb, title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
+                        c+=1
+                        semana_pdf = cchild.findall("./properties/property[@pnid='823']/property-value[@pnid='823']")[0].text
 
-                    document_file = DocumentFile(path=recurso)
-                    examplepdf = DocumentNode(thumbnail=thumb, title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
-                    semana_pdf = cchild.findall("./properties/property[@pnid='823']/property-value[@pnid='823']")[0].text
+                        if semana_pdf != semana_aux:
+                            semana = TopicNode(source_id=semana_pdf, title=semana_pdf)
+                            semana_aux = semana_pdf
+                            topico.add_child(semana)
+                            semana.add_child(examplepdf)
+                        else:
+                            semana.add_child(examplepdf)
+                    for i in range(10):
+                        if cchild.findall("./binaries/binary[@id='recurso_"+str(i)+"']/link") != []:
+                            recurso = cchild.findall("./binaries/binary[@id='recurso_"+str(i)+"']/link")[0].text
+                            thumb =  cchild.findall("./binaries/binary[@id='recurso_"+str(i)+"']/thumb_link")[0].text
+                            document_file = DocumentFile(path=recurso)
+                            examplepdf = DocumentNode(thumbnail=thumb, title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
+                            c+=1
+                            semana_pdf = cchild.findall("./properties/property[@pnid='823']/property-value[@pnid='823']")[0].text
 
-                    if semana_pdf != semana_aux:
-                        semana = TopicNode(source_id=semana_pdf, title=semana_pdf)
-                        semana_aux = semana_pdf
-                        topico.add_child(semana)
-                        semana.add_child(examplepdf)
-                    else:
-                        semana.add_child(examplepdf)
+                            if semana_pdf != semana_aux:
+                                semana = TopicNode(source_id=semana_pdf, title=semana_pdf)
+                                semana_aux = semana_pdf
+                                topico.add_child(semana)
+                                semana.add_child(examplepdf)
+                            else:
+                                semana.add_child(examplepdf)
+                        else:
+                            break
+
+#                    if cchild.findall("./binaries/binary[@id='recurso_2']/link") != []:
+#                        recurso = cchild.findall("./binaries/binary[@id='recurso_2']/link")[0].text
+#                        thumb =  cchild.findall("./binaries/binary[@id='recurso_2']/thumb_link")[0].text
+#                        document_file = DocumentFile(path=recurso)
+#                        examplepdf = DocumentNode(thumbnail=thumb, title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
+#                        c+=1
+#                        semana_pdf = cchild.findall("./properties/property[@pnid='823']/property-value[@pnid='823']")[0].text
+#
+#                        if semana_pdf != semana_aux:
+#                            semana = TopicNode(source_id=semana_pdf, title=semana_pdf)
+#                            semana_aux = semana_pdf
+#                            topico.add_child(semana)
+#                            semana.add_child(examplepdf)
+#                        else:
+#                            semana.add_child(examplepdf)
+
+                  #  document_file = DocumentFile(path=recurso)
+                  #  examplepdf = DocumentNode(thumbnail=thumb, title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
+                  #  semana_pdf = cchild.findall("./properties/property[@pnid='823']/property-value[@pnid='823']")[0].text
+
+                  # if semana_pdf != semana_aux:
+                  #      semana = TopicNode(source_id=semana_pdf, title=semana_pdf)
+                  #      semana_aux = semana_pdf
+                  #      topico.add_child(semana)
+                  #      semana.add_child(examplepdf)
+                  #  else:
+                  #      semana.add_child(examplepdf)
 
                 if child.attrib['bid'] == '9481': #lecturas [pdf]
                     recurso = cchild.findall("./binaries/binary[@id='recurso_pdf']/link")[0].text
@@ -89,7 +129,7 @@ class MineducChef(SushiChef):
 
                 if child.attrib['bid'] == '9482': # orientaciones [mp4]
                     recurso = "https://www.curriculumnacional.cl/offline/videos/descargas/" + YouTube(cchild.findall("./binaries/binary[@id='youtube']/url")[0].text).video_id + ".mp4"
-                    thumb = cchild.findall("./binaries/binary[@id='youtube']/thumb_link")[0].text
+                    thumb = cchild.findall("./binaries/binary[@id='thumbnail']/thumb_link")[0].text
                     document_file = VideoFile(path=recurso)
                     examplepdf = VideoNode(thumbnail=thumb, title=titulo, source_id=str(c), files=[document_file], license=get_license(licenses.PUBLIC_DOMAIN))
                     topico.add_child(examplepdf)
